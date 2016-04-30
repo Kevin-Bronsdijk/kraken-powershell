@@ -1,6 +1,7 @@
 ﻿PowerShell module for Kraken.io
 =============
-
+* Mono: Run [![Travis build status](https://travis-ci.org/Kevin-Bronsdijk/kraken-powershell.svg?branch=master)](https://travis-ci.org/Kevin-Bronsdijk/kraken-powershell)
+* 
 ## Getting Started
 A PowerShell Binary Module (merged assembly) will be provided soon. For now, just compile the project, use Import-Module kraken.powershell.dll and make sure all supporting assemblies are available.
 
