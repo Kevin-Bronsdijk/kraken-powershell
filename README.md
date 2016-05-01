@@ -2,7 +2,7 @@
 =============
 [![Build status](https://ci.appveyor.com/api/projects/status/u6u2a8i6h313x0mu?svg=true)](https://ci.appveyor.com/project/Kevin-Bronsdijk/kraken-powershell)
 
-This PowerShell Module can be used to assist optimizing images directly from within the PowerShell command prompt.
+This PowerShell Module can be used to optimize images directly from within the PowerShell command prompt.
 
 The data source can be a local drive or images already publicly available on the internet. Storing data within Azure Blob storage is supported for direct uploads and existing images access by the Url.
 
