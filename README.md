@@ -1,9 +1,16 @@
 ﻿PowerShell module for Kraken.io
 =============
-Mono: Run [![Travis build status](https://travis-ci.org/Kevin-Bronsdijk/kraken-powershell.svg?branch=master)](https://travis-ci.org/Kevin-Bronsdijk/kraken-powershell)
+[![Build status](https://ci.appveyor.com/api/projects/status/u6u2a8i6h313x0mu?svg=true)](https://ci.appveyor.com/project/Kevin-Bronsdijk/kraken-powershell)
+
+This PowerShell Module can be used to assist optimizing images directly from within the PowerShell command prompt.
+
+The data source can be a local drive or images already publicly available on the internet. Storing data within Azure Blob storage is supported for direct uploads and existing images access by the Url.
+
+This Module is based on SeaMist, my .Net based API wrapper for the kraken.io REST API. Only a limited subset of features are supported. For more information visit https://github.com/Kevin-Bronsdijk/SeaMist or consult the official kraken.io documentation.
 
 ## Getting Started
-A PowerShell Binary Module (merged assembly) will be provided soon. For now, just compile the project, use Import-Module kraken.powershell.dll and make sure all supporting assemblies are available.
+
+Download the PowerShell Binary Module (merged assembly) from the folder named module (kraken.powershell.zip) or just compile the project on your own.
 
 ## Code Samples
 
