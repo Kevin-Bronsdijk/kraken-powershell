@@ -73,11 +73,11 @@ namespace kraken.powershell
                     select _krakenClient.OptimizeWait(image, imageName, new OptimizeUploadWaitRequest()
                         )).ToList();
 
-                Task.WaitAll(tasks.Cast<Task>().ToArray());
+                Task.WaitAll(tasks.Cast<Task>().ToArray(), Consts.TimeoutInMilliseconds);
 
                 foreach (var task in tasks)
                 {
-                    WriteObject(task.Result.Body);
+                    WriteObject(HelperFunctions.ReturnObject(task.Result));
                 }
             }
             else
@@ -97,7 +97,7 @@ namespace kraken.powershell
 
                 foreach (var task in tasks)
                 {
-                    WriteObject(task.Result.Body);
+                    WriteObject(HelperFunctions.ReturnObject(task.Result));
                 }
             }
 

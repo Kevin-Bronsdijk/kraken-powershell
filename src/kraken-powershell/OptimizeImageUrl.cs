@@ -73,7 +73,7 @@ namespace kraken.powershell
 
                 foreach (var task in tasks)
                 {
-                    WriteObject(task.Result.Body);
+                    WriteObject(HelperFunctions.ReturnObject(task.Result));
                 }
             }
             else
@@ -90,7 +90,7 @@ namespace kraken.powershell
 
                 foreach (var task in tasks)
                 {
-                    WriteObject(task.Result.Body);
+                    WriteObject(HelperFunctions.ReturnObject(task.Result));
                 }
             }
 
