@@ -35,12 +35,15 @@ $result | Format-Table
 ```
 
 ```
-Success FileName                OriginalSize KrakedSize SavedBytes KrakedUrl                                                                           
-------- --------                ------------ ---------- ---------- ---------                                                                           
-   True app-insights.png               74185      60324      13861 https://dl.kraken.io/api/db/2c/3a/0be9d85ffe658ee1da641b6dc6/app-insights.png       
-   True azureportalsettings.png        20231      17282       2949 https://dl.kraken.io/api/3c/2a/24/59ab8b37dc1dcd89dc12b5aa42/azureportalsettings.png
-   True DevSlice.png                   22081      16995       5086 https://dl.kraken.io/api/49/3f/91/9622a17f62988d57d711e7f624/DevSlice.png           
-   True krakenio.png                   11188       9764       1424 https://dl.kraken.io/api/b9/4b/19/40b3826329cf3e56078e9a6251/krakenio.png   
+Success FileName                OriginalSize KrakedSize SavedBytes KrakedUrl                                                                            Stat
+                                                                                                                                                        usCo
+                                                                                                                                                          de
+------- --------                ------------ ---------- ---------- ---------                                                                            ----
+   True app-insights.png               74185      60324      13861 https://dl.kraken.io/api/ae/0f/77/faf9349157f9c980caac396fdb/app-insights.png         200
+   True azureportalsettings.png        20231      17282       2949 https://dl.kraken.io/api/10/90/71/83f8100a08cb444d3ff2e22904/azureportalsettings.png  200
+   True DevSlice.png                   22081      16995       5086 https://dl.kraken.io/api/fb/6b/f5/f6f6adf482747affc7e301a35a/DevSlice.png             200
+   True krakenio.png                   11188       9764       1424 https://dl.kraken.io/api/bd/2c/c4/2e833c1cdbdc0f47b4fe107db9/krakenio.png             200
+
 ```
 
 **Reporting**
@@ -60,12 +63,12 @@ $result | Format-Table
 ```
 
 ```
-Id                              
---                              
-2c1d52b60f669d761d43ff771975c263
-30b8dc74cfda849732d3f5b7dbd5ea73
-55db2b3ce28192af1f6aa02e2853101f
-ea5828bb38b32345a6dd64e74c87bfa4
+Success Id                               StatusCode
+------- --                               ----------
+   True 772e0b465aa847d687b03668978d9146        200
+   True 0d0e009badde15adb211aca118ad88ad        200
+   True 15f282e4ae8b8542fffc486a78f0f1fa        200
+   True a95605ab59df2ca7ab4a51d7e82f85f9        200
 ```
 
 **Public images from xbox.com**
@@ -92,12 +95,12 @@ $result = Optimize-ImageToAzure -FilePath $files.FullName -Key $key -Secret $sec
 $result | Format-Table
 ```
 ```
-Success FileName                OriginalSize KrakedSize SavedBytes KrakedUrl                                                                    
-------- --------                ------------ ---------- ---------- ---------                                                                    
-   True app-insights.png               74185      60324      13861 https://seamist.blob.core.windows.net/test/powershell/app-insights.png       
-   True azureportalsettings.png        20231      17282       2949 https://seamist.blob.core.windows.net/test/powershell/azureportalsettings.png
-   True DevSlice.png                   22081      16995       5086 https://seamist.blob.core.windows.net/test/powershell/DevSlice.png           
-   True krakenio.png                   11188       9764       1424 https://seamist.blob.core.windows.net/test/powershell/krakenio.png 
+Success FileName                OriginalSize KrakedSize SavedBytes KrakedUrl                                                                     StatusCode
+------- --------                ------------ ---------- ---------- ---------                                                                     ----------
+   True app-insights.png               74185      60324      13861 https://seamist.blob.core.windows.net/test/powershell/app-insights.png               200
+   True azureportalsettings.png        20231      17282       2949 https://seamist.blob.core.windows.net/test/powershell/azureportalsettings.png        200
+   True DevSlice.png                   22081      16995       5086 https://seamist.blob.core.windows.net/test/powershell/DevSlice.png                   200
+   True krakenio.png                   11188       9764       1424 https://seamist.blob.core.windows.net/test/powershell/krakenio.png                   200
 ```
 **Upload public images to Azure Blob storage**
 ```powershell
