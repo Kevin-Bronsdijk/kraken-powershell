@@ -1,20 +1,15 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
-using SeaMist;
-using SeaMist.Http;
-using SeaMist.Model.Azure;
+using OptimizeRequest = SeaMist.Model.Azure.OptimizeRequest;
+using OptimizeWaitRequest = SeaMist.Model.Azure.OptimizeWaitRequest;
 
 namespace kraken.powershell
 {
     [Cmdlet(VerbsCommon.Optimize, "ImageUrlToAzure")]
-    public class OptimizeImageUrlToAzure : PSCmdlet
+    public class OptimizeImageUrlToAzure : PsOptimizeAzureBase
     {
-        private KrakenClient _krakenClient;
-        private KrakenConnection _krakenConnection;
-
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
@@ -22,94 +17,31 @@ namespace kraken.powershell
             Position = 0
             )]
         public string[] FileUrl { get; set; }
-
-        [Parameter(
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 1
-            )]
-        public string Key { get; set; }
-
-        [Parameter(
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 2
-            )]
-        public string Secret { get; set; }
-
-        [Parameter(
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 3
-            )]
-        public bool Wait { get; set; }
-
+        
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
             ValueFromPipeline = true,
-            Position = 4
+            Position = 8
             )]
-        public string CallBackUrl { get; set; }
-
-        [Parameter(
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 5
-            )]
-        public string AzureAccount { get; set; }
-
-        [Parameter(
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 6
-            )]
-        public string AzureKey { get; set; }
-
-        [Parameter(
-            Mandatory = true,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 6
-            )]
-        public string AzureContainer { get; set; }
-
-        [Parameter(
-            Mandatory = false,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 7
-            )]
-        public string AzurePath { get; set; }
-
-        protected override void BeginProcessing()
-        {
-            _krakenConnection = KrakenConnection.Create(Key, Secret);
-            _krakenClient = new KrakenClient(_krakenConnection);
-
-            base.BeginProcessing();
-        }
+        public bool KeepPath { get; set; } = false;
 
         protected override void ProcessRecord()
         {
             if (Wait)
             {
                 var tasks = (from url in FileUrl
-                    select _krakenClient.OptimizeWait(
+                    select KrakenClient.OptimizeWait(
                         new OptimizeWaitRequest(new Uri(url),
-                            AzureAccount, AzureKey, AzureContainer, AzurePath + Path.GetFileName(new Uri(url).LocalPath))
+                            AzureAccount, AzureKey, AzureContainer,
+                            HelperFunctions.BuildAzurePath(url, KeepPath, AzurePath))
                         )).ToList();
 
                 Task.WaitAll(tasks.Cast<Task>().ToArray());
 
                 foreach (var task in tasks)
                 {
-                    WriteObject(HelperFunctions.ReturnObject(task.Result));
+                    WriteObject(HelperFunctions.CreateReturnObject(task.Result));
                 }
             }
             else
@@ -120,28 +52,21 @@ namespace kraken.powershell
                 }
 
                 var tasks = (from url in FileUrl
-                    select _krakenClient.Optimize(
+                    select KrakenClient.Optimize(
                         new OptimizeRequest(new Uri(url), new Uri(CallBackUrl),
-                            AzureAccount, AzureKey, AzureContainer, AzurePath + Path.GetFileName(new Uri(url).LocalPath))
+                            AzureAccount, AzureKey, AzureContainer,
+                            HelperFunctions.BuildAzurePath(url, KeepPath, AzurePath))
                         )).ToList();
 
                 Task.WaitAll(tasks.Cast<Task>().ToArray());
 
                 foreach (var task in tasks)
                 {
-                    WriteObject(HelperFunctions.ReturnObject(task.Result));
+                    WriteObject(HelperFunctions.CreateReturnObject(task.Result));
                 }
             }
 
             base.ProcessRecord();
-        }
-
-        protected override void EndProcessing()
-        {
-            _krakenConnection.Dispose();
-            _krakenClient.Dispose();
-
-            base.EndProcessing();
         }
     }
 }

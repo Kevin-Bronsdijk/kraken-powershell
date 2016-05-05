@@ -1,4 +1,6 @@
-﻿using kraken.powershell.Model;
+﻿using System;
+using System.IO;
+using kraken.powershell.Model;
 using SeaMist.Http;
 using SeaMist.Model;
 
@@ -6,7 +8,7 @@ namespace kraken.powershell
 {
     internal static class HelperFunctions
     {
-        public static object ReturnObject(IApiResponse<OptimizeResult> response)
+        public static object CreateReturnObject(IApiResponse<OptimizeResult> response)
         {
             object resultCallback;
 
@@ -32,7 +34,7 @@ namespace kraken.powershell
             return resultCallback;
         }
 
-        public static object ReturnObject(IApiResponse<OptimizeWaitResult> response)
+        public static object CreateReturnObject(IApiResponse<OptimizeWaitResult> response)
         {
             object resultCallback;
 
@@ -59,6 +61,16 @@ namespace kraken.powershell
             }
 
             return resultCallback;
+        }
+
+        public static string BuildAzurePath(string url, bool keepPath, string azurePath)
+        {
+            if (keepPath)
+            {
+                return azurePath + new Uri(url).LocalPath.Replace("//", "/");
+            }
+
+            return azurePath + Path.GetFileName(new Uri(url).LocalPath);
         }
     }
 }

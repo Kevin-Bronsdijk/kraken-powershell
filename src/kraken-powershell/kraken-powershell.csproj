@@ -69,6 +69,8 @@
     <Compile Include="OptimizeImageUrl.cs" />
     <Compile Include="OptimizeImageUrlToAzure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PsOptimizeAzureBase.cs" />
+    <Compile Include="PsOptimizeBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

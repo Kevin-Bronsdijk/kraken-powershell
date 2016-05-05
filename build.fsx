@@ -13,7 +13,7 @@ open Fake.AssemblyInfoFile
 let project = "kraken-powershell"
 let authors = ["Kevin Bronsdijk"]
 let summary = "PowerShell module for Kraken.io"
-let version = "0.1.0.0"
+let version = "0.1.0.1"
 let description = """
 PowerShell module for Kraken.io.
 """
