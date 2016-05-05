@@ -114,6 +114,16 @@ Success FileName                                 OriginalSize KrakedSize SavedBy
    True 672e8768-d75a-4c68-82bd-e9b003e997e3.jpg        56524      51675       4849 https://seamist.blob.core.windows.net/test/powershell/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg
 
 ```
+**Maintain the uri structure when uploading public images to Azure Blob storage**
+```powershell
+$files = @('http://compass.xbox.com/assets/67/2e/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg')
+$result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true `
+-AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer  $azureContainer -KeepPath $true
+$result.KrakedUrl
+```
+```
+https://seamist.blob.core.windows.net/test/assets/67/2e/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg
+```
 
 ## LICENSE - MIT
 
