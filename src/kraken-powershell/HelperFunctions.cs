@@ -6,7 +6,7 @@ using SeaMist.Model;
 
 namespace kraken.powershell
 {
-    internal static class HelperFunctions
+    public static class HelperFunctions
     {
         public static object CreateReturnObject(IApiResponse<OptimizeResult> response)
         {
@@ -63,14 +63,32 @@ namespace kraken.powershell
             return resultCallback;
         }
 
-        public static string BuildAzurePath(string url, bool keepPath, string azurePath)
+        public static string BuildAzurePath(string url, bool keepPath, string azurePath, string azureContainer)
         {
+            var uri = new Uri(url);
+
             if (keepPath)
             {
-                return azurePath + new Uri(url).LocalPath.Replace("//", "/");
+                if (DestinationIsSameAzureContainer(uri, azureContainer))
+                {
+                    var location = uri.LocalPath.Remove(0, azureContainer.Length + 1);
+                    return UrlCleanUp($"{azurePath}{location}");
+                }
+
+                return UrlCleanUp($"{azurePath}{uri.LocalPath}");
             }
 
-            return azurePath + Path.GetFileName(new Uri(url).LocalPath);
+            return UrlCleanUp($"/{azurePath}/{Path.GetFileName(uri.LocalPath)}");
+        }
+
+        public static bool DestinationIsSameAzureContainer(Uri url, string azureContainer)
+        {
+            return url.AbsoluteUri.ToLower().Contains("blob.core.windows.net") && url.LocalPath.StartsWith("/" + azureContainer);
+        }
+
+        public static string UrlCleanUp(string url)
+        {
+            return url.Replace("//", "/");
         }
     }
 }

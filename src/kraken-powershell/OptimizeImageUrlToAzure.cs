@@ -34,7 +34,7 @@ namespace kraken.powershell
                     select KrakenClient.OptimizeWait(
                         new OptimizeWaitRequest(new Uri(url),
                             AzureAccount, AzureKey, AzureContainer,
-                            HelperFunctions.BuildAzurePath(url, KeepPath, AzurePath))
+                            HelperFunctions.BuildAzurePath(url, KeepPath, AzurePath, AzureContainer))
                         )).ToList();
 
                 Task.WaitAll(tasks.Cast<Task>().ToArray());
@@ -55,7 +55,7 @@ namespace kraken.powershell
                     select KrakenClient.Optimize(
                         new OptimizeRequest(new Uri(url), new Uri(CallBackUrl),
                             AzureAccount, AzureKey, AzureContainer,
-                            HelperFunctions.BuildAzurePath(url, KeepPath, AzurePath))
+                            HelperFunctions.BuildAzurePath(url, KeepPath, AzurePath, AzureContainer))
                         )).ToList();
 
                 Task.WaitAll(tasks.Cast<Task>().ToArray());

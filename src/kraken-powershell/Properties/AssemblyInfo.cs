@@ -4,11 +4,11 @@ using System.Reflection;
 [assembly: AssemblyTitleAttribute("kraken-powershell")]
 [assembly: AssemblyProductAttribute("kraken-powershell")]
 [assembly: AssemblyDescriptionAttribute("PowerShell module for Kraken.io")]
-[assembly: AssemblyVersionAttribute("0.1.0.1")]
-[assembly: AssemblyFileVersionAttribute("0.1.0.1")]
+[assembly: AssemblyVersionAttribute("0.1.0.2")]
+[assembly: AssemblyFileVersionAttribute("0.1.0.2")]
 namespace System {
     internal static class AssemblyVersionInformation {
-        internal const string Version = "0.1.0.1";
-        internal const string InformationalVersion = "0.1.0.1";
+        internal const string Version = "0.1.0.2";
+        internal const string InformationalVersion = "0.1.0.2";
     }
 }
