@@ -22,6 +22,10 @@ For more about information kraken-net can be found [here](https://github.com/Kev
   * [Upload images](#upload-images)
   * [Public images](#public-images)
   * [Maintain folder structure](#maintain-folder-structure)
+* [Amazon S3](#amazon-s3)
+  * [Upload images](#upload-images)
+  * [Public images](#public-images)
+  * [Maintain folder structure](#maintain-folder-structure)
 
 ## Getting Started
 
@@ -48,7 +52,7 @@ VERBOSE: Importing cmdlet 'Optimize-ImageUrlToAzure'.
 
 Uploading and optimizing multiple files at the same time is simple. The progress indicator will keep you informed regarding the optimization progress.
 
-You can download the compressed files on your own or specify the location using the `-LocalStoragePath`
+You can download the compressed files on your own or specify the location using `-LocalStoragePath`
 
 ```powershell
 $files = Get-ChildItem 'C:\path\..\myfolder' -Filter *.png, *.jpg, *.jpeg
@@ -83,7 +87,8 @@ The result:
 The callback option can be used when you have a separate process responsible for dealing with the compressed images. Just provide the Url to receive callback notifications about completed compression requests.
 
 ```powershell
-$result = Optimize-Image -FilePath $files.FullName -Key $key -Secret $secret -Wait $false  -CallBackUrl 'http://devslice.net/callback'
+$result = Optimize-Image -FilePath $files.FullName -Key $key -Secret $secret -Wait $false ` 
+ -CallBackUrl 'http://devslice.net/callback'
 $result | Format-Table
 ```
 
@@ -112,7 +117,7 @@ $result | Format-Table
 
 ```
 Success FileName        OriginalSize KrakedSize SavedBytes KrakedUrl                                         
-------- --------        ------------ ---------- ---------- ---------                                                                                            
+------- --------        ------------ ---------- ---------- ---------   
    True image1.jpg        56524        51675         4849       https://dl.kraken.io/api/9a7......474/image1.jpg
    True image2.jpg       120945       116149         4796       https://dl.kraken.io/api/ae1......ec3/image2.jpg
    True image3.jpg        73536        62889        10647       https://dl.kraken.io/api/992......5f0/image3.jpg
@@ -127,7 +132,8 @@ it’s possible to give kraken.io the instructions to store the compressed image
 
 ```powershell
 $files = Get-ChildItem 'C:\path\..\myfolder' -Filter *.png, *.jpg, *.jpeg
-$result = Optimize-ImageToAzure -FilePath $files.FullName -Key $key -Secret $secret -Wait $true -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -AzurePath 'powershell/' 
+$result = Optimize-ImageToAzure -FilePath $files.FullName -Key $key -Secret $secret -Wait $true `
+ -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -AzurePath 'powershell/' 
 $result | Format-Table
 ```
 ```
@@ -146,7 +152,8 @@ It’s not required to upload your images if they are already available online. 
 ```powershell
 $files = @('http://compass.xbox.com/assets/image1.jpg')
 
-$result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -AzurePath 'sample2/' 
+$result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true `
+ -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -AzurePath 'sample2/' 
 $result | Format-Table
 ```
 ```
@@ -159,7 +166,7 @@ True    image1.jpg  56524         51675       4849        https://kraken1.blob.c
 
 If you want the maintain the same folder structure within your Azure Blob Storage, make sure to specify the `-KeepPath` option (Public images only). 
 
-This option will leave out the source container name when both the source and destination are Azure Blob Storage based. 
+This option will also leave out the source container name when both the source and destination are Azure Blob Storage based. 
 
 ```powershell
 $files = @('http://compass.xbox.com/assets/67/2e/image1.jpg')
@@ -172,6 +179,61 @@ The file was created with a matching folder structure;
 ```
 https://kraken1.blob.core.windows.net/test/assets/67/2e/image1.jpg
 ```
+
+## Amazon S3
+
+it’s possible to give kraken.io the instructions to store the compressed images directly within your AWS S3 bucket. This will be performed directly and eliminates the need to download the images to your local system first.
+
+### Upload images
+
+```powershell
+$files = Get-ChildItem 'C:\path\..\myfolder' -Filter *.png, *.jpg, *.jpeg
+$result = Optimize-ImageToS3 -FilePath $files.FullName -Key $key -Secret $secret -Wait $true `
+ -AmazonKey $amazonKey -AmazonSecret $amazonSecret -AmazonBucket  $amazonBucket -S3Path 'powershell/' 
+$result | Format-Table
+```
+```
+Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl                                            StatusCode
+------- --------      ------------ ---------- ---------- ---------                                            ----------
+   True image1.png      74185      60324      13861 https://kraken.s3.amazonaws.com/powershell/image1.png     200
+   True image2.png      20231      17282       2949 https://kraken.s3.amazonaws.com/powershell/image2.png     200
+   True image2.png      22081      16995       5086 https://kraken.s3.amazonaws.com/powershell/image3.png     200
+   True image4.png      11188       9764       1424 https://kraken.s3.amazonaws.com/powershell/image4.png     200
+```
+
+### Public images
+
+It’s not required to upload your images if they are already available online. Just use the Url instead. 
+
+```powershell
+$files = @('http://compass.xbox.com/assets/image1.jpg')
+
+$result = Optimize-ImageUrlToS3 -FileUrl $files -Key $key -Secret $secret -Wait $true `
+ -AmazonKey $amazonKey -AmazonSecret $amazonSecret -AmazonBucket $amazonBucket -S3Path 'powershell' 
+$result | Format-Table
+```
+```
+Success FileName    OriginalSize  KrakedSize  SavedBytes  KrakedUrl     
+------- --------    ------------  ----------  ----------  ---------
+True    image1.jpg  56524         51675       4849        https://kraken.s3.amazonaws.com/powershell/image1.jpg 
+```
+
+### Maintain folder structure
+
+If you want the maintain the same folder structure within your AWS S3 Bucket, make sure to specify the `-KeepPath` option (Public images only). 
+
+```powershell
+$files = @('http://compass.xbox.com/assets/67/2e/image1.jpg')
+
+$result = Optimize-ImageUrlToS3 -FileUrl $files -Key $key -Secret $secret -Wait $true `
+-AmazonKey $amazonKey -AmazonSecret $amazonSecret -AmazonBucket  $amazonBucket -KeepPath $true
+$result.KrakedUrl
+```
+The file was created with a matching folder structure;
+```
+https://kraken.s3.eu-central-1.amazonaws.com/assets/67/2e/image1.jpg
+```
+
 
 ## LICENSE - MIT
 
