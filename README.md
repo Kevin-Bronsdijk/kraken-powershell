@@ -31,7 +31,7 @@ First you need to sign up for the [Kraken API](http://kraken.io/plans/) and obta
 
 Download the PowerShell Binary Module (kraken.powershell.dll and the supporting assemblies) from the folder named module [module](https://github.com/Kevin-Bronsdijk/kraken-powershell/tree/master/module)(kraken.powershell.zip).
 
-**Import the module**
+And import the Module using `Import-Module`
 
 ```powershell
 Import-Module 'C:\path\..\kraken.powershell.dll' -Verbose
@@ -57,12 +57,12 @@ $result | Format-Table
 ```
 All individual requests made to kraken will be listed as shown below:
 ```
-Success FileName                OriginalSize KrakedSize SavedBytes KrakedUrl                                            StatusCode
-------- --------                ------------ ---------- ---------- ---------                                            ----
-   True image1.png               74185      60324      13861 https://dl.kraken.io/api/9a7c7c7......79e4474/image1.png   200
-   True image2.png               20231      17282       2949 https://dl.kraken.io/api/772e0b4......a95605a/image2.png   200
-   True image3.png               22081      16995       5086 https://dl.kraken.io/api/9a7c7c7......72e0b46/image3.png   200
-   True image4.png               11188       9764       1424 https://dl.kraken.io/api/a95605a......79e4473/image4.png   200
+Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl                                          StatusCode
+------- --------      ------------ ---------- ---------- ---------                                          ----
+   True image1.png    74185        60324      13861      https://dl.kraken.io/api/9a7......9e7/image1.png   200
+   True image2.png    20231        17282       2949      https://dl.kraken.io/api/772......a95/image2.png   200
+   True image3.png    22081        16995       5086      https://dl.kraken.io/api/9a7......72e/image3.png   200
+   True image4.png    11188         9764       1424      https://dl.kraken.io/api/a95......79e/image4.png   200
 
 ```
 
@@ -157,7 +157,7 @@ True    image1.jpg  56524         51675       4849        https://kraken1.blob.c
 
 ### Maintain folder structure
 
-If you want the maintain the same folder structure within your Azure Blob Storage, make sure to specify the -KeepPath option (Public images only). 
+If you want the maintain the same folder structure within your Azure Blob Storage, make sure to specify the `-KeepPath` option (Public images only). 
 
 This option will leave out the source container name when both the source and destination are Azure Blob Storage based. 
 
