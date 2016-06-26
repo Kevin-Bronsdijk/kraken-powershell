@@ -2,17 +2,36 @@
 =============
 [![Build status](https://ci.appveyor.com/api/projects/status/u6u2a8i6h313x0mu?svg=true)](https://ci.appveyor.com/project/Kevin-Bronsdijk/kraken-powershell)
 
-This PowerShell Module can be used to optimize images directly from within the PowerShell command prompt.
+***
+### Advanced image optimization using Powershell and Kraken.io
+
+The kraken-powershell module is a wrapper around [kraken-net](https://github.com/Kevin-Bronsdijk/kraken-net) and simplifies optimizing images from using a command prompt
+
+kraken-powershell focuses on batch processing of items without the need of writing a full application. Due to this, only a subset of what kraken-net offers is exposed. This can change in the future, but depends on submitted enhancement requests. 
 
 The data source can be a local drive or images already publicly available on the internet. Storing data within Azure Blob storage is supported for direct uploads and existing images access by the Url.
 
-This Module is based on SeaMist, my .Net based API wrapper for the kraken.io REST API. Only a limited subset of features are supported. For more information visit https://github.com/Kevin-Bronsdijk/SeaMist or consult the official kraken.io documentation.
+For more about information kraken-net can be found [here](https://github.com/Kevin-Bronsdijk/kraken-net) or consult the official [kraken.io](https://kraken.io) documentation.
+
+***
+* [Getting Started](#getting-started)
+* [Installation](#installation)
+* [Upload files](#upload-files)
+* [Reporting](#reporting)
+* [Upload files with callback](#upload-files-with-callback)
+* [Public images](#public-images)
+* [Azure Blob Storage](#azure-blob-storage)
+  * [Upload images](#upload-images)
+  * [Public images](#public-images)
+  * [Maintain folder structure](#maintain-folder-structure)
 
 ## Getting Started
 
-Download the PowerShell Binary Module (merged assembly) from the folder named module (kraken.powershell.zip) or just compile the project on your own.
+First you need to sign up for the [Kraken API](http://kraken.io/plans/) and obtain your unique **API Key** and **API Secret**. You will find both under [API Credentials](http://kraken.io/account/api-credentials). Once you have set up your account, you can start using the kraken-powershell module.
 
-## Code Samples
+## Installation
+
+Download the PowerShell Binary Module (kraken.powershell.dll and the supporting assemblies) from the folder named module [module](https://github.com/Kevin-Bronsdijk/kraken-powershell/tree/master/module)(kraken.powershell.zip).
 
 **Import the module**
 
@@ -26,36 +45,44 @@ VERBOSE: Importing cmdlet 'Optimize-ImageUrl'.
 VERBOSE: Importing cmdlet 'Optimize-ImageToAzure'.
 VERBOSE: Importing cmdlet 'Optimize-ImageUrlToAzure'.
 ```
-**Upload files**
+
+### Upload files
+
+Uploading and optimizing multiple files at the same time is simple. The progress indicator will keep you informed regarding the optimization progress.
+
+You can download the compressed files on your own or specify the location using the `-LocalStoragePath`
 
 ```powershell
-$files = Get-ChildItem 'C:\Users\Kevin\Pictures\Krakentest' -Filter *.png
+$files = Get-ChildItem 'C:\path\..\myfolder' -Filter *.png, *.jpg, *.jpeg
 $result = Optimize-Image -FilePath $files.FullName -Key $key -Secret $secret -Wait $true  
 $result | Format-Table
 ```
-
+All individual requests made to kraken will be listed as shown below:
 ```
-Success FileName                OriginalSize KrakedSize SavedBytes KrakedUrl                                                                            Stat
-                                                                                                                                                        usCo
-                                                                                                                                                          de
-------- --------                ------------ ---------- ---------- ---------                                                                            ----
-   True app-insights.png               74185      60324      13861 https://dl.kraken.io/api/ae/0f/77/faf9349157f9c980caac396fdb/app-insights.png         200
-   True azureportalsettings.png        20231      17282       2949 https://dl.kraken.io/api/10/90/71/83f8100a08cb444d3ff2e22904/azureportalsettings.png  200
-   True DevSlice.png                   22081      16995       5086 https://dl.kraken.io/api/fb/6b/f5/f6f6adf482747affc7e301a35a/DevSlice.png             200
-   True krakenio.png                   11188       9764       1424 https://dl.kraken.io/api/bd/2c/c4/2e833c1cdbdc0f47b4fe107db9/krakenio.png             200
+Success FileName                OriginalSize KrakedSize SavedBytes KrakedUrl                                            StatusCode
+------- --------                ------------ ---------- ---------- ---------                                            ----
+   True image1.png               74185      60324      13861 https://dl.kraken.io/api/9a7c7c7......79e4474/image1.png   200
+   True image2.png               20231      17282       2949 https://dl.kraken.io/api/772e0b4......a95605a/image2.png   200
+   True image3.png               22081      16995       5086 https://dl.kraken.io/api/9a7c7c7......72e0b46/image3.png   200
+   True image4.png               11188       9764       1424 https://dl.kraken.io/api/a95605a......79e4473/image4.png   200
 
 ```
 
-**Reporting**
+### Reporting
+
+It’s very easy to generate simple repots based on the data exposed by Kraken.io. The sample below creates a sum of all saved bytes from one batch.
+
 ```powershell
 $savedBytes = ($result | Measure-Object SavedBytes -Sum).Sum
 $savedBytes
 ```
-
+The result:
 ```
 23320
 ```
-**Upload files with callback**
+### Upload files with callback
+
+The callback option can be used when you have a separate process responsible for dealing with the compressed images. Just provide the Url to receive callback notifications about completed compression requests.
 
 ```powershell
 $result = Optimize-Image -FilePath $files.FullName -Key $key -Secret $secret -Wait $false  -CallBackUrl 'http://devslice.net/callback'
@@ -71,63 +98,86 @@ Success Id                               StatusCode
    True a95605ab59df2ca7ab4a51d7e82f85f9        200
 ```
 
-**Public images from xbox.com**
+### Public images
+
+It’s not required to upload your images if they are already available online. Just use the Url instead. 
+
 ```powershell
-$files = @('http://compass.xbox.com/assets/67/2e/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg',
-            'http://compass.xbox.com/assets/4f/e1/4fe1a0fc-22ff-4130-a3ec-a74c19cf8bcb.jpg',
-            'http://compass.xbox.com/assets/db/08/db080bcc-6d81-451a-a867-cb9f96399599.jpg',
-            'http://compass.xbox.com/assets/14/5e/145e00ee-22d3-4226-b5ca-4ab821230f60.jpg')
+$files = @('http://compass.xbox.com/assets/image1.jpg',
+           'http://compass.xbox.com/assets/image2.jpg',
+           'http://compass.xbox.com/assets/image3.jpg',
+           'http://compass.xbox.com/assets/image4.jpg')
+            
 $result = Optimize-ImageUrl -FileUrl $files -Key $key -Secret $secret -Wait $true  
 $result | Format-Table
 ```
-```
-Success FileName                                 OriginalSize KrakedSize SavedBytes KrakedUrl                                                                                            
-------- --------                                 ------------ ---------- ---------- ---------                                                                                            
-   True 672e8768-d75a-4c68-82bd-e9b003e997e3.jpg        56524      51675       4849 https://dl.kraken.io/api/98/5d/0e/9a7c7c73c762d9a594979e4474/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg
-   True 4fe1a0fc-22ff-4130-a3ec-a74c19cf8bcb.jpg       120945     116149       4796 https://dl.kraken.io/api/6a/a7/3d/ae1db847a23ec3a2d40762ae25/4fe1a0fc-22ff-4130-a3ec-a74c19cf8bcb.jpg
-   True db080bcc-6d81-451a-a867-cb9f96399599.jpg        73536      62889      10647 https://dl.kraken.io/api/ea/40/27/9921d5832085f02148640b327c/db080bcc-6d81-451a-a867-cb9f96399599.jpg
-   True 145e00ee-22d3-4226-b5ca-4ab821230f60.jpg       141438     137558       3880 https://dl.kraken.io/api/42/10/15/da20e1bd42262d4ab01e9a0ba4/145e00ee-22d3-4226-b5ca-4ab821230f60.jpg
-```
-**Upload images to Azure Blob storage**
-```powershell
-$files = Get-ChildItem 'C:\Users\Kevin\Pictures\Krakentest' -Filter *.png
-$result = Optimize-ImageToAzure -FilePath $files.FullName -Key $key -Secret $secret -Wait $true -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer  $azureContainer -AzurePath 'powershell/' 
-$result | Format-Table
-```
-```
-Success FileName                OriginalSize KrakedSize SavedBytes KrakedUrl                                                                     StatusCode
-------- --------                ------------ ---------- ---------- ---------                                                                     ----------
-   True app-insights.png               74185      60324      13861 https://seamist.blob.core.windows.net/test/powershell/app-insights.png               200
-   True azureportalsettings.png        20231      17282       2949 https://seamist.blob.core.windows.net/test/powershell/azureportalsettings.png        200
-   True DevSlice.png                   22081      16995       5086 https://seamist.blob.core.windows.net/test/powershell/DevSlice.png                   200
-   True krakenio.png                   11188       9764       1424 https://seamist.blob.core.windows.net/test/powershell/krakenio.png                   200
-```
-**Upload public images to Azure Blob storage**
-```powershell
-$files = @('http://compass.xbox.com/assets/67/2e/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg')
-$result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer  $azureContainer -AzurePath 'powershell/' 
-$result | Format-Table
-```
-```
-Success FileName                                 OriginalSize KrakedSize SavedBytes KrakedUrl                                                                                     
-------- --------                                 ------------ ---------- ---------- ---------                                                                                     
-   True 672e8768-d75a-4c68-82bd-e9b003e997e3.jpg        56524      51675       4849 https://seamist.blob.core.windows.net/test/powershell/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg
 
 ```
-**Maintain the uri structure when uploading public images to Azure Blob storage**
+Success FileName        OriginalSize KrakedSize SavedBytes KrakedUrl                                         
+------- --------        ------------ ---------- ---------- ---------                                                                                            
+   True image1.jpg        56524        51675         4849       https://dl.kraken.io/api/9a7......474/image1.jpg
+   True image2.jpg       120945       116149         4796       https://dl.kraken.io/api/ae1......ec3/image2.jpg
+   True image3.jpg        73536        62889        10647       https://dl.kraken.io/api/992......5f0/image3.jpg
+   True image4.jpg       141438       137558         3880       https://dl.kraken.io/api/da2......0e1/image4.jpg
+```
+
+## Azure Blob Storage
+
+it’s possible to give kraken.io the instructions to store the compressed images directly within your Azure Blob Storage container. This will be performed directly and eliminates the need to download the images to your local system first.
+
+### Upload images
+
 ```powershell
-$files = @('http://compass.xbox.com/assets/67/2e/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg')
+$files = Get-ChildItem 'C:\path\..\myfolder' -Filter *.png, *.jpg, *.jpeg
+$result = Optimize-ImageToAzure -FilePath $files.FullName -Key $key -Secret $secret -Wait $true -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -AzurePath 'powershell/' 
+$result | Format-Table
+```
+```
+Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl                                                      StatusCode
+------- --------      ------------ ---------- ---------- ---------                                                      ----------
+   True image1.png      74185      60324      13861 https://kraken1.blob.core.windows.net/test/powershell/image1.png    200
+   True image2.png      20231      17282       2949 https://kraken1.blob.core.windows.net/test/powershell/image2.png    200
+   True image2.png      22081      16995       5086 https://kraken1.blob.core.windows.net/test/powershell/image3.png    200
+   True image4.png      11188       9764       1424 https://kraken1.blob.core.windows.net/test/powershell/image4.png    200
+```
+
+### Public images
+
+It’s not required to upload your images if they are already available online. Just use the Url instead. 
+
+```powershell
+$files = @('http://compass.xbox.com/assets/image1.jpg')
+
+$result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -AzurePath 'sample2/' 
+$result | Format-Table
+```
+```
+Success FileName    OriginalSize  KrakedSize  SavedBytes  KrakedUrl     
+------- --------    ------------  ----------  ----------  ---------
+True    image1.jpg  56524         51675       4849        https://kraken1.blob.core.windows.net/test/sample2/image1.jpg
+```
+
+### Maintain folder structure
+
+If you want the maintain the same folder structure within your Azure Blob Storage, make sure to specify the -KeepPath option (Public images only). 
+
+This option will leave out the source container name when both the source and destination are Azure Blob Storage based. 
+
+```powershell
+$files = @('http://compass.xbox.com/assets/67/2e/image1.jpg')
+
 $result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true `
--AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer  $azureContainer -KeepPath $true
+-AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -KeepPath $true
 $result.KrakedUrl
 ```
+The file was created with a matching folder structure;
 ```
-https://seamist.blob.core.windows.net/test/assets/67/2e/672e8768-d75a-4c68-82bd-e9b003e997e3.jpg
+https://kraken1.blob.core.windows.net/test/assets/67/2e/image1.jpg
 ```
 
 ## LICENSE - MIT
 
-Copyright (c) 2016 Kevin Bronsdijk - http://devslice.net/
+Copyright (c) 2016
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
