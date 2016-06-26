@@ -7,9 +7,7 @@
 
 The kraken-powershell module is a wrapper around [kraken-net](https://github.com/Kevin-Bronsdijk/kraken-net) and simplifies optimizing images from using a command prompt
 
-kraken-powershell focuses on batch processing of items without the need of writing a full application. Due to this, only a subset of what kraken-net offers is exposed. This can change in the future, but depends on submitted enhancement requests. 
-
-The data source can be a local drive or images already publicly available on the internet. Storing data within Azure Blob storage is supported for direct uploads and existing images access by the Url.
+kraken-powershell focuses on batch processing without the need of writing a full application. Due to this, only a subset of what kraken-net offers is available. This can change in the future however depends on your enhancement requests. 
 
 For more about information kraken-net can be found [here](https://github.com/Kevin-Bronsdijk/kraken-net) or consult the official [kraken.io](https://kraken.io) documentation.
 
