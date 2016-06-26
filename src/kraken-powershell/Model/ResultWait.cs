@@ -1,4 +1,4 @@
-﻿namespace kraken.powershell.Model
+﻿namespace Kraken.Powershell.Model
 {
     internal class ResultWait
     {
@@ -9,5 +9,6 @@
         public int SavedBytes { get; set; }
         public string KrakedUrl { get; set; }
         public int StatusCode { get; set; }
+        public string Error { get; set; }
     }
 }

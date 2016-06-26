@@ -2,9 +2,8 @@ using System;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
-using SeaMist.Model;
 
-namespace kraken.powershell
+namespace Kraken.Powershell
 {
     [Cmdlet(VerbsCommon.Optimize, "ImageUrl")]
     public class OptimizeImageUrl : PsOptimizeBase
@@ -19,37 +18,32 @@ namespace kraken.powershell
 
         protected override void ProcessRecord()
         {
-            if (Wait)
-            {
-                var tasks = FileUrl.Select(url => KrakenClient.OptimizeWait(
-                    new OptimizeWaitRequest(new Uri(url)))).ToList();
-
-                Task.WaitAll(tasks.Cast<Task>().ToArray());
-
-                foreach (var task in tasks)
-                {
-                    WriteObject(HelperFunctions.CreateReturnObject(task.Result));
-                }
-            }
-            else
-            {
-                if (string.IsNullOrEmpty(CallBackUrl))
-                {
-                    throw new ArgumentNullException($"CallBackUrl can\'t be empty when Wait is false");
-                }
-
-                var tasks = FileUrl.Select(url => KrakenClient.Optimize(
-                    new OptimizeRequest(new Uri(url), new Uri(CallBackUrl)))).ToList();
-
-                Task.WaitAll(tasks.Cast<Task>().ToArray());
-
-                foreach (var task in tasks)
-                {
-                    WriteObject(HelperFunctions.CreateReturnObject(task.Result));
-                }
-            }
-
             base.ProcessRecord();
+
+            MessageAdapter adapter = new MessageAdapter(this, FileUrl.Count())
+            {
+                Message = Consts.ProgressMessage,
+                Formatter = new ApiResultFormatter()
+            };
+
+            Task.Factory.StartNew(() => 
+            {
+                for (int x = 0; x < FileUrl.Count(); x++)
+                {
+                    if (Wait)
+                    {
+                        var task = Client.OptimizeWait(new Uri(FileUrl[x]));
+                        adapter.WriteObject(task.Result);
+                    }
+                    else
+                    {
+                        var task = Client.Optimize(new Uri(FileUrl[x]), new Uri(CallBackUrl));
+                        adapter.WriteObject(task.Result);
+                    }
+                }
+                adapter.Finished = true;
+            });
+            adapter.Listen();
         }
     }
 }

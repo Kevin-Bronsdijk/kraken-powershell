@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Management.Automation;
-using Kraken.Model.Azure;
+using Kraken.Model.S3;
 
 namespace Kraken.Powershell
 {
-    public abstract class PsOptimizeAzureBase : PsOptimizeBase
+    public abstract class PsOptimizeS3Base : PsOptimizeBase
     {
         [Parameter(
             Mandatory = true,
@@ -12,7 +12,7 @@ namespace Kraken.Powershell
             ValueFromPipeline = true,
             Position = 5
             )]
-        public string AzureAccount { get; set; }
+        public string AmazonKey { get; set; }
 
         [Parameter(
             Mandatory = true,
@@ -20,7 +20,7 @@ namespace Kraken.Powershell
             ValueFromPipeline = true,
             Position = 6
             )]
-        public string AzureKey { get; set; }
+        public string AmazonSecret { get; set; }
 
         [Parameter(
             Mandatory = true,
@@ -28,7 +28,7 @@ namespace Kraken.Powershell
             ValueFromPipeline = true,
             Position = 6
             )]
-        public string AzureContainer { get; set; }
+        public string AmazonBucket { get; set; }
 
         [Parameter(
             Mandatory = false,
@@ -36,7 +36,7 @@ namespace Kraken.Powershell
             ValueFromPipeline = true,
             Position = 7
             )]
-        public string AzurePath { get; set; }
+        public string S3Path { get; set; }
 
         //[Parameter(
         //Mandatory = false,
@@ -54,9 +54,12 @@ namespace Kraken.Powershell
         //)]
         //public Hashtable Metadata { get; set; }
 
-        internal DataStore CreateDataStore(string account, string key, string container, string path)
+        internal DataStore CreateDataStore(string key, string secret, string bucket, string path)
         {
-            var ds = new DataStore(account, key, container, path);
+            var ds = new DataStore(key, secret, bucket, string.Empty)
+            {
+                Path = path
+            };
 
             //foreach (DictionaryEntry kvp in Headers)
             //{

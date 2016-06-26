@@ -1,5 +1,5 @@
 ﻿using System;
-using kraken.powershell;
+using Kraken.Powershell;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Tests
@@ -12,7 +12,7 @@ namespace Tests
         {
             var url = new Uri("https://devslice.net/folder1/folder2/image.png");
 
-            Assert.IsTrue(HelperFunctions.DestinationIsSameAzureContainer(url, "testContainer") != true);
+            Assert.IsTrue(HelperFunctions.DestinationUsesSameAzureContainer(url, "testContainer") != true);
         }
 
         [TestMethod]
@@ -20,23 +20,23 @@ namespace Tests
         {
             var url = new Uri("https://devslice.net/testContainer/folder2/image.png");
 
-            Assert.IsTrue(HelperFunctions.DestinationIsSameAzureContainer(url, "testContainer") != true);
+            Assert.IsTrue(HelperFunctions.DestinationUsesSameAzureContainer(url, "testContainer") != true);
         }
 
         [TestMethod]
         public void DestinationIsSameAzureContainer_OnAzureDifferentRootFolder_IsTrue()
         {
-            var url = new Uri("https://seamist.blob.core.windows.net/test/folder2/image.png");
+            var url = new Uri("https://kraken.blob.core.windows.net/test/folder2/image.png");
 
-            Assert.IsTrue(HelperFunctions.DestinationIsSameAzureContainer(url, "testContainer") != true);
+            Assert.IsTrue(HelperFunctions.DestinationUsesSameAzureContainer(url, "testContainer") != true);
         }
 
         [TestMethod]
         public void DestinationIsSameAzureContainer_OnAzureSameRootFolder_IsTrue()
         {
-            var url = new Uri("https://seamist.blob.core.windows.net/testContainer/folder2/image.png");
+            var url = new Uri("https://kraken.blob.core.windows.net/testContainer/folder2/image.png");
 
-            Assert.IsTrue(HelperFunctions.DestinationIsSameAzureContainer(url, "testContainer"));
+            Assert.IsTrue(HelperFunctions.DestinationUsesSameAzureContainer(url, "testContainer"));
         }
 
 
@@ -45,7 +45,7 @@ namespace Tests
         {
             const string url = "https://devslice.net/folder1/folder2/image.png";
 
-            var result = HelperFunctions.BuildAzurePath(url, false, "powershell", "test");
+            var result = HelperFunctions.BuildPath(url, false, "powershell", "test");
 
             Assert.IsTrue(result == "/powershell/image.png");
         }
@@ -55,7 +55,7 @@ namespace Tests
         {
             const string url = "https://devslice.net/folder1/folder2/image.png";
 
-            var result = HelperFunctions.BuildAzurePath(url, false, "", "test");
+            var result = HelperFunctions.BuildPath(url, false, "", "test");
 
             Assert.IsTrue(result == "/image.png");
         }
@@ -65,7 +65,7 @@ namespace Tests
         {
             const string url = "https://devslice.net/folder1/folder2/image.png";
 
-            var result = HelperFunctions.BuildAzurePath(url, true, "", "folder1");
+            var result = HelperFunctions.BuildPath(url, true, "", "folder1");
 
             Assert.IsTrue(result == "/folder1/folder2/image.png");
         }
@@ -74,9 +74,9 @@ namespace Tests
         [TestMethod]
         public void BuildAzurePath_SourceAzureNewPathWithAzurePath_IsTrue()
         {
-            const string url = "https://seamist.blob.core.windows.net/folder1/folder2/image.png";
+            const string url = "https://kraken.blob.core.windows.net/folder1/folder2/image.png";
 
-            var result = HelperFunctions.BuildAzurePath(url, false, "powershell", "test");
+            var result = HelperFunctions.BuildPath(url, false, "powershell", "test");
 
             Assert.IsTrue(result == "/powershell/image.png");
         }
@@ -84,9 +84,9 @@ namespace Tests
         [TestMethod]
         public void BuildAzurePath_SourceAzureNewPathNoAzurePath_IsTrue()
         {
-            const string url = "https://seamist.blob.core.windows.net/folder1/folder2/image.png";
+            const string url = "https://kraken.blob.core.windows.net/folder1/folder2/image.png";
 
-            var result = HelperFunctions.BuildAzurePath(url, false, "", "test");
+            var result = HelperFunctions.BuildPath(url, false, "", "test");
 
             Assert.IsTrue(result == "/image.png");
         }
@@ -94,9 +94,9 @@ namespace Tests
         [TestMethod]
         public void BuildAzurePath_SourceAzureNewPathKeepOldPathNoAzurePath_IsTrue()
         {
-            const string url = "https://seamist.blob.core.windows.net/folder1/folder2/image.png";
+            const string url = "https://kraken.blob.core.windows.net/folder1/folder2/image.png";
 
-            var result = HelperFunctions.BuildAzurePath(url, true, "", "folder1");
+            var result = HelperFunctions.BuildPath(url, true, "", "folder1");
 
             Assert.IsTrue(result == "/folder2/image.png");
         }

@@ -7,12 +7,13 @@
     <ProjectGuid>{5C26A9FB-C5A7-4765-8EDC-9F86C9B6D5B3}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>kraken.powershell</RootNamespace>
+    <RootNamespace>Kraken.Powershell</RootNamespace>
     <AssemblyName>kraken.powershell</AssemblyName>
-    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -32,12 +33,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="kraken, Version=0.1.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\kraken-net.1.1.0\lib\net452\kraken.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SeaMist, Version=0.1.1.5, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SeaMist.1.1.5\lib\net45\SeaMist.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -48,10 +49,6 @@
       <HintPath>..\assemblies\System.Management.Automation.dll</HintPath>
     </Reference>
     <Reference Include="System.Net" />
-    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
-      <Private>True</Private>
-    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -62,17 +59,24 @@
   <ItemGroup>
     <Compile Include="Consts.cs" />
     <Compile Include="HelperFunctions.cs" />
+    <Compile Include="IResultFormatter.cs" />
+    <Compile Include="MessageAdapter.cs" />
     <Compile Include="Model\ResultCallback.cs" />
     <Compile Include="Model\ResultWait.cs" />
     <Compile Include="OptimizeImage.cs" />
+    <Compile Include="OptimizeImageToS3.cs" />
     <Compile Include="OptimizeImageToAzure.cs" />
     <Compile Include="OptimizeImageUrl.cs" />
+    <Compile Include="OptimizeImageUrlToS3.cs" />
     <Compile Include="OptimizeImageUrlToAzure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PsOptimizeS3Base.cs" />
     <Compile Include="PsOptimizeAzureBase.cs" />
     <Compile Include="PsOptimizeBase.cs" />
+    <Compile Include="ApiResultFormatter.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

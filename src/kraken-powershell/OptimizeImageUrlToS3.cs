@@ -2,13 +2,13 @@ using System;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
-using OptimizeRequest = Kraken.Model.Azure.OptimizeRequest;
-using OptimizeWaitRequest = Kraken.Model.Azure.OptimizeWaitRequest;
+using OptimizeRequest = Kraken.Model.S3.OptimizeRequest;
+using OptimizeWaitRequest = Kraken.Model.S3.OptimizeWaitRequest;
 
 namespace Kraken.Powershell
 {
-    [Cmdlet(VerbsCommon.Optimize, "ImageUrlToAzure")]
-    public class OptimizeImageUrlToAzure : PsOptimizeAzureBase
+    [Cmdlet(VerbsCommon.Optimize, "ImageUrlToS3")]
+    public class OptimizeImageUrlToS3 : PsOptimizeS3Base
     {
         [Parameter(
             Mandatory = true,
@@ -30,9 +30,9 @@ namespace Kraken.Powershell
         {
             base.ProcessRecord();
 
-            if (KeepPath && !string.IsNullOrEmpty(AzurePath))
+            if (KeepPath && !string.IsNullOrEmpty(S3Path))
             {
-                throw new ArgumentNullException("Can't use KeepPath and AzurePath at the same time");
+                throw new ArgumentNullException("Can't use KeepPath and S3Path at the same time");
             }
 
             MessageAdapter adapter = new MessageAdapter(this, FileUrl.Count())
@@ -48,8 +48,8 @@ namespace Kraken.Powershell
                     if (Wait)
                     {
                         var request = new OptimizeWaitRequest(new Uri(FileUrl[x]),
-                            CreateDataStore(AzureAccount, AzureKey, AzureContainer,
-                                HelperFunctions.BuildPath(FileUrl[x], KeepPath, AzurePath, AzureContainer)
+                            CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
+                                HelperFunctions.BuildPath(FileUrl[x], KeepPath, S3Path, AmazonBucket)
                             ));
 
                         var task = Client.OptimizeWait(request);
@@ -58,8 +58,8 @@ namespace Kraken.Powershell
                     else
                     {
                         var request = new OptimizeRequest(new Uri(FileUrl[x]), new Uri(CallBackUrl),
-                            CreateDataStore(AzureAccount, AzureKey, AzureContainer,
-                                HelperFunctions.BuildPath(FileUrl[x], KeepPath, AzurePath, AzureContainer)
+                            CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
+                                HelperFunctions.BuildPath(FileUrl[x], KeepPath, S3Path, AmazonBucket)
                             ));
 
                         var task = Client.Optimize(request);

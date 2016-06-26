@@ -3,12 +3,12 @@ using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
-using Kraken.Model.Azure;
+using Kraken.Model.S3;
 
 namespace Kraken.Powershell
 {
-    [Cmdlet(VerbsCommon.Optimize, "ImageToAzure")]
-    public class OptimizeImageToAzure : PsOptimizeAzureBase
+    [Cmdlet(VerbsCommon.Optimize, "ImageToS3")]
+    public class OptimizeImageToS3 : PsOptimizeS3Base
     {
         [Parameter(
             Mandatory = true,
@@ -35,8 +35,8 @@ namespace Kraken.Powershell
                     if (Wait)
                     {
                         var request = new OptimizeUploadWaitRequest(
-                            CreateDataStore(AzureAccount, AzureKey, AzureContainer,
-                            AzurePath + Path.GetFileName(FilePath[x]))
+                            CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
+                            S3Path + Path.GetFileName(FilePath[x]))
                             );
 
                         var task = Client.OptimizeWait(FilePath[x], request);
@@ -45,8 +45,8 @@ namespace Kraken.Powershell
                     else
                     {
                         var request = new OptimizeUploadRequest(new Uri(CallBackUrl),
-                            CreateDataStore(AzureAccount, AzureKey, AzureContainer,
-                            AzurePath + Path.GetFileName(FilePath[x]))
+                            CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
+                            S3Path + Path.GetFileName(FilePath[x]))
                             );
 
                         var task = Client.Optimize(FilePath[x], request);

@@ -1,20 +1,20 @@
 using System.Management.Automation;
-using SeaMist;
-using SeaMist.Http;
+using Kraken.Http;
+using System;
 
-namespace kraken.powershell
+namespace Kraken.Powershell
 {
     public abstract class PsOptimizeBase : PSCmdlet
     {
         [Parameter(
             DontShow = true
             )]
-        public KrakenClient KrakenClient { get; set; }
+        public Client Client { get; set; }
 
         [Parameter(
             DontShow = true
             )]
-        public KrakenConnection KrakenConnection { get; set; }
+        public Connection Connection { get; set; }
 
         [Parameter(
             Mandatory = true,
@@ -50,16 +50,21 @@ namespace kraken.powershell
 
         protected override void BeginProcessing()
         {
-            KrakenConnection = KrakenConnection.Create(Key, Secret);
-            KrakenClient = new KrakenClient(KrakenConnection);
+            Connection = Connection.Create(Key, Secret);
+            Client = new Client(Connection);
+
+            if (!Wait && string.IsNullOrEmpty(CallBackUrl))
+            {
+                throw new ArgumentNullException(Consts.CallBackUrlRequiredMesssage);
+            }
 
             base.BeginProcessing();
         }
 
         protected override void EndProcessing()
         {
-            KrakenConnection.Dispose();
-            KrakenClient.Dispose();
+            Connection.Dispose();
+            Client.Dispose();
 
             base.EndProcessing();
         }

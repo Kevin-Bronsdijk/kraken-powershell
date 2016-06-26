@@ -1,3 +1,11 @@
+
+FAKE
+bin
+obj
+.fake
+output
+.suo
+
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
