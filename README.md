@@ -11,6 +11,8 @@ kraken-powershell focuses on batch processing without the need of writing a full
 
 For more about information kraken-net can be found [here](https://github.com/Kevin-Bronsdijk/kraken-net) or consult the official [kraken.io](https://kraken.io) documentation.
 
+![kraken-powershell cmd example](https://raw.githubusercontent.com/Kevin-Bronsdijk/kraken-powershell/master/docs/img/kraken-powshell-cmd-1.png)
+
 ***
 * [Getting Started](#getting-started)
 * [Installation](#installation)
