@@ -20,14 +20,17 @@ For more about information kraken-net can be found [here](https://github.com/Kev
 * [Reporting](#reporting)
 * [Upload files with callback](#upload-files-with-callback)
 * [Public images](#public-images)
+* [Compression Settings](#compression-settings)
 * [Azure Blob Storage](#azure-blob-storage)
   * [Upload images](#upload-images)
   * [Public images](#public-images)
   * [Maintain folder structure](#maintain-folder-structure)
+  * [Headers and Metadata](#headers-and-metadata)
 * [Amazon S3](#amazon-s3)
   * [Upload images](#upload-images)
   * [Public images](#public-images)
   * [Maintain folder structure](#maintain-folder-structure)
+  * [Headers and Metadata](#headers-and-metadata)
 
 ## Getting Started
 
@@ -45,16 +48,16 @@ Import-Module 'C:\path\..\kraken.powershell.dll' -Verbose
 
 ```
 VERBOSE: Importing cmdlet 'Optimize-Image'.
-VERBOSE: Importing cmdlet 'Optimize-ImageUrl'.
+VERBOSE: Importing cmdlet 'Optimize-ImageToS3'.
 VERBOSE: Importing cmdlet 'Optimize-ImageToAzure'.
+VERBOSE: Importing cmdlet 'Optimize-ImageUrl'.
+VERBOSE: Importing cmdlet 'Optimize-ImageUrlToS3'.
 VERBOSE: Importing cmdlet 'Optimize-ImageUrlToAzure'.
 ```
 
 ### Upload files
 
 Uploading and optimizing multiple files at the same time is simple. The progress indicator will keep you informed regarding the optimization progress.
-
-You can download the compressed files on your own or specify the location using `-LocalStoragePath`
 
 ```powershell
 $files = Get-ChildItem 'C:\path\..\myfolder' -Filter *.png, *.jpg, *.jpeg
@@ -63,8 +66,8 @@ $result | Format-Table
 ```
 All individual requests made to kraken will be listed as shown below:
 ```
-Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl                                          StatusCode
-------- --------      ------------ ---------- ---------- ---------                                          ----
+Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl                                          Status
+------- --------      ------------ ---------- ---------- ---------                                          ------
    True image1.png    74185        60324      13861      https://dl.kraken.io/api/9a7......9e7/image1.png   200
    True image2.png    20231        17282       2949      https://dl.kraken.io/api/772......a95/image2.png   200
    True image3.png    22081        16995       5086      https://dl.kraken.io/api/9a7......72e/image3.png   200
@@ -120,11 +123,20 @@ $result | Format-Table
 ```
 Success FileName        OriginalSize KrakedSize SavedBytes KrakedUrl                                         
 ------- --------        ------------ ---------- ---------- ---------   
-   True image1.jpg        56524        51675         4849       https://dl.kraken.io/api/9a7......474/image1.jpg
-   True image2.jpg       120945       116149         4796       https://dl.kraken.io/api/ae1......ec3/image2.jpg
-   True image3.jpg        73536        62889        10647       https://dl.kraken.io/api/992......5f0/image3.jpg
-   True image4.jpg       141438       137558         3880       https://dl.kraken.io/api/da2......0e1/image4.jpg
+   True image1.jpg        56524        51675         4849  https://dl.kraken.io/api/9a7......474/image1.jpg
+   True image2.jpg       120945       116149         4796  https://dl.kraken.io/api/ae1......ec3/image2.jpg
+   True image3.jpg        73536        62889        10647  https://dl.kraken.io/api/992......5f0/image3.jpg
+   True image4.jpg       141438       137558         3880  https://dl.kraken.io/api/da2......0e1/image4.jpg
 ```
+
+### Compression Settings
+
+The following parameters is supported for all Cmdlets.
+
+- **Lossy** (`$true/$false`) `false` by default
+- **WebP** (`$true/$false`) `false` by default 
+- **AutoOrient** (`$true/$false`) `false` by default 
+- **SamplingScheme** (`4:2:0, 4:2:2, 4:4:4`) `4:2:0` is the default
 
 ## Azure Blob Storage
 
@@ -139,8 +151,8 @@ $result = Optimize-ImageToAzure -FilePath $files.FullName -Key $key -Secret $sec
 $result | Format-Table
 ```
 ```
-Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl                                                      StatusCode
-------- --------      ------------ ---------- ---------- ---------                                                      ----------
+Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl                                                      Status
+------- --------      ------------ ---------- ---------- ---------                                                      ------
    True image1.png      74185      60324      13861 https://kraken1.blob.core.windows.net/test/powershell/image1.png    200
    True image2.png      20231      17282       2949 https://kraken1.blob.core.windows.net/test/powershell/image2.png    200
    True image2.png      22081      16995       5086 https://kraken1.blob.core.windows.net/test/powershell/image3.png    200
@@ -152,7 +164,7 @@ Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl              
 It’s not required to upload your images if they are already available online. Just use the Url instead. 
 
 ```powershell
-$files = @('http://compass.xbox.com/assets/image1.jpg')
+$files = @('http://dev.devslice.net/assets/image1.jpg')
 
 $result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true `
  -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -AzurePath 'sample2/' 
@@ -171,7 +183,7 @@ If you want the maintain the same folder structure within your Azure Blob Storag
 This option will also leave out the source container name when both the source and destination are Azure Blob Storage based. 
 
 ```powershell
-$files = @('http://compass.xbox.com/assets/67/2e/image1.jpg')
+$files = @('http://dev.devslice.net/assets/67/2e/image1.jpg')
 
 $result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true `
 -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer 'test' -KeepPath $true
@@ -181,6 +193,24 @@ The file was created with a matching folder structure;
 ```
 https://kraken1.blob.core.windows.net/test/assets/67/2e/image1.jpg
 ```
+### Headers and Metadata
+
+Adding custom headers and metadata is supported as demonstrated in the sample below.
+
+```powershell
+
+$headers = @{}
+$headers.Add('Cache-Control','max-age=1234')
+
+$metadata = @{}
+$metadata.Add('test1','value1')
+$metadata.Add('test2','value2')
+
+$result = Optimize-ImageUrlToAzure -FileUrl $files -Key $key -Secret $secret -Wait $true `
+ -AzureAccount $azureAccount -AzureKey $azureKey -AzureContainer  $azureContainer -KeepPath $true `
+ -Headers $headers -Metadata $metadata
+```
+
 
 ## Amazon S3
 
@@ -208,7 +238,7 @@ Success FileName      OriginalSize KrakedSize SavedBytes KrakedUrl              
 It’s not required to upload your images if they are already available online. Just use the Url instead. 
 
 ```powershell
-$files = @('http://compass.xbox.com/assets/image1.jpg')
+$files = @('http://dev.devslice.net/assets/image1.jpg')
 
 $result = Optimize-ImageUrlToS3 -FileUrl $files -Key $key -Secret $secret -Wait $true `
  -AmazonKey $amazonKey -AmazonSecret $amazonSecret -AmazonBucket $amazonBucket -S3Path 'powershell' 
@@ -225,7 +255,7 @@ True    image1.jpg  56524         51675       4849        https://kraken.s3.amaz
 If you want the maintain the same folder structure within your AWS S3 Bucket, make sure to specify the `-KeepPath` option (Public images only). 
 
 ```powershell
-$files = @('http://compass.xbox.com/assets/67/2e/image1.jpg')
+$files = @('http://dev.devslice.net/assets/67/2e/image1.jpg')
 
 $result = Optimize-ImageUrlToS3 -FileUrl $files -Key $key -Secret $secret -Wait $true `
 -AmazonKey $amazonKey -AmazonSecret $amazonSecret -AmazonBucket  $amazonBucket -KeepPath $true
@@ -235,7 +265,23 @@ The file was created with a matching folder structure;
 ```
 https://kraken.s3.eu-central-1.amazonaws.com/assets/67/2e/image1.jpg
 ```
+### Headers and Metadata
 
+Adding custom headers and metadata is supported as demonstrated in the sample below.
+
+```powershell
+
+$headers = @{}
+$headers.Add('Cache-Control','max-age=1234')
+
+$metadata = @{}
+$metadata.Add('test1','value1')
+$metadata.Add('test2','value2')
+
+$result = Optimize-ImageUrlToS3 -FileUrl $files -Key $key -Secret $secret -Wait $true `
+ -AmazonKey $amazonKey -AmazonSecret $amazonSecret -AmazonBucket  $amazonBucket -KeepPath $true `
+ -Headers $headers -Metadata $metadata
+```
 
 ## LICENSE - MIT
 
