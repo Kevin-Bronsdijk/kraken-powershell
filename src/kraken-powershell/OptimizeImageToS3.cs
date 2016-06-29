@@ -37,7 +37,13 @@ namespace Kraken.Powershell
                         var request = new OptimizeUploadWaitRequest(
                             CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
                             S3Path + Path.GetFileName(FilePath[x]))
-                            );
+                            )
+                        {
+                            WebP = WebP,
+                            Lossy = Lossy,
+                            AutoOrient = AutoOrient,
+                            SamplingScheme = HelperFunctions.ConvertSamplingScheme(SamplingScheme)
+                        };
 
                         var task = Client.OptimizeWait(FilePath[x], request);
                         adapter.WriteObject(task.Result);
@@ -47,7 +53,13 @@ namespace Kraken.Powershell
                         var request = new OptimizeUploadRequest(new Uri(CallBackUrl),
                             CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
                             S3Path + Path.GetFileName(FilePath[x]))
-                            );
+                            )
+                        {
+                            WebP = WebP,
+                            Lossy = Lossy,
+                            AutoOrient = AutoOrient,
+                            SamplingScheme = HelperFunctions.ConvertSamplingScheme(SamplingScheme)
+                        };
 
                         var task = Client.Optimize(FilePath[x], request);
                         adapter.WriteObject(task.Result);

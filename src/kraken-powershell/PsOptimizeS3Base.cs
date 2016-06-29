@@ -10,7 +10,7 @@ namespace Kraken.Powershell
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
             ValueFromPipeline = true,
-            Position = 5
+            Position = 10
             )]
         public string AmazonKey { get; set; }
 
@@ -18,7 +18,7 @@ namespace Kraken.Powershell
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
             ValueFromPipeline = true,
-            Position = 6
+            Position = 11
             )]
         public string AmazonSecret { get; set; }
 
@@ -26,7 +26,7 @@ namespace Kraken.Powershell
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
             ValueFromPipeline = true,
-            Position = 6
+            Position = 12
             )]
         public string AmazonBucket { get; set; }
 
@@ -34,25 +34,25 @@ namespace Kraken.Powershell
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
             ValueFromPipeline = true,
-            Position = 7
+            Position = 13
             )]
         public string S3Path { get; set; }
 
-        //[Parameter(
-        //Mandatory = false,
-        //ValueFromPipelineByPropertyName = true,
-        //ValueFromPipeline = true,
-        //Position = 9
-        //)]
-        //public Hashtable Headers { get; set; }
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            ValueFromPipeline = true,
+            Position = 14
+        )]
+        public Hashtable Headers { get; set; }
 
-        //[Parameter(
-        //Mandatory = false,
-        //ValueFromPipelineByPropertyName = true,
-        //ValueFromPipeline = true,
-        //Position = 10
-        //)]
-        //public Hashtable Metadata { get; set; }
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            ValueFromPipeline = true,
+            Position = 15
+        )]
+        public Hashtable Metadata { get; set; }
 
         internal DataStore CreateDataStore(string key, string secret, string bucket, string path)
         {
@@ -61,26 +61,33 @@ namespace Kraken.Powershell
                 Path = path
             };
 
-            //foreach (DictionaryEntry kvp in Headers)
-            //{
-            //    var eKey = kvp.Key as string;
-            //    var eVal = kvp.Value as string;
+            if (Headers != null)
+            {
+                foreach (DictionaryEntry kvp in Headers)
+                {
+                    var eKey = kvp.Key as string;
+                    var eVal = kvp.Value as string;
 
-            //    if (string.IsNullOrEmpty(eKey) && string.IsNullOrEmpty(eVal))
-            //    {
-            //        ds.AddHeaders(eKey, eVal);
-            //    }
-            //}
+                    if (!string.IsNullOrEmpty(eKey) && !string.IsNullOrEmpty(eVal))
+                    {
+                        ds.AddHeaders(eKey, eVal);
+                    }
+                }
+            }
 
-            //foreach (DictionaryEntry kvp in Metadata)
-            //{
-            //    var eKey = kvp.Key as string;
-            //    var eVal = kvp.Value as string;
-            //    if (string.IsNullOrEmpty(eKey) && string.IsNullOrEmpty(eVal))
-            //    {
-            //        ds.AddHeaders(eKey, eVal);
-            //    }
-            //}
+            if (Metadata != null)
+            {
+                foreach (DictionaryEntry kvp in Metadata)
+                {
+                    var eKey = kvp.Key as string;
+                    var eVal = kvp.Value as string;
+
+                    if (!string.IsNullOrEmpty(eKey) && !string.IsNullOrEmpty(eVal))
+                    {
+                        ds.AddMetadata(eKey, eVal);
+                    }
+                }
+            }
 
             return ds;
         }

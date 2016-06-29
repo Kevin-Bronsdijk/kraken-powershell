@@ -33,12 +33,28 @@ namespace Kraken.Powershell
                 {
                     if (Wait)
                     {
-                        var task = Client.OptimizeWait(FilePath[x]);
+                        var request = new Kraken.Model.OptimizeUploadWaitRequest()
+                        {
+                            WebP = WebP,
+                            Lossy = Lossy,
+                            AutoOrient = AutoOrient,
+                            SamplingScheme = HelperFunctions.ConvertSamplingScheme(SamplingScheme)
+                        };
+
+                        var task = Client.OptimizeWait(FilePath[x], request);
                         adapter.WriteObject(task.Result);
                     }
                     else
                     {
-                        var task = Client.Optimize(FilePath[x], new Uri(CallBackUrl));
+                        var request = new Kraken.Model.OptimizeUploadRequest(new Uri(CallBackUrl))
+                        {
+                            WebP = WebP,
+                            Lossy = Lossy,
+                            AutoOrient = AutoOrient,
+                            SamplingScheme = HelperFunctions.ConvertSamplingScheme(SamplingScheme)
+                        };
+
+                        var task = Client.Optimize(FilePath[x], request);
                         adapter.WriteObject(task.Result);
                     }
                 }

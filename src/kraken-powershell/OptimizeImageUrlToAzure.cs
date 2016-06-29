@@ -22,7 +22,7 @@ namespace Kraken.Powershell
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
             ValueFromPipeline = true,
-            Position = 8
+            Position = 9
             )]
         public bool KeepPath { get; set; } = false;
 
@@ -50,7 +50,13 @@ namespace Kraken.Powershell
                         var request = new OptimizeWaitRequest(new Uri(FileUrl[x]),
                             CreateDataStore(AzureAccount, AzureKey, AzureContainer,
                                 HelperFunctions.BuildPath(FileUrl[x], KeepPath, AzurePath, AzureContainer)
-                            ));
+                            ))
+                        {
+                            WebP = WebP,
+                            Lossy = Lossy,
+                            AutoOrient = AutoOrient,
+                            SamplingScheme = HelperFunctions.ConvertSamplingScheme(SamplingScheme)
+                        };
 
                         var task = Client.OptimizeWait(request);
                         adapter.WriteObject(task.Result);
@@ -60,7 +66,13 @@ namespace Kraken.Powershell
                         var request = new OptimizeRequest(new Uri(FileUrl[x]), new Uri(CallBackUrl),
                             CreateDataStore(AzureAccount, AzureKey, AzureContainer,
                                 HelperFunctions.BuildPath(FileUrl[x], KeepPath, AzurePath, AzureContainer)
-                            ));
+                            ))
+                        {
+                            WebP = WebP,
+                            Lossy = Lossy,
+                            AutoOrient = AutoOrient,
+                            SamplingScheme = HelperFunctions.ConvertSamplingScheme(SamplingScheme)
+                        };
 
                         var task = Client.Optimize(request);
                         adapter.WriteObject(task.Result);

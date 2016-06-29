@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Kraken.Model;
 
 namespace Kraken.Powershell
 {
@@ -33,6 +34,22 @@ namespace Kraken.Powershell
         public static string UrlCleanUp(string url)
         {
             return url.Replace("//", "/");
+        }
+
+        internal static SamplingScheme ConvertSamplingScheme(string samplingScheme)
+        {
+            if (samplingScheme == "4:2:2")
+            {
+                return Kraken.Model.SamplingScheme.S422;
+            }
+            if (samplingScheme == "4:4:4")
+            {
+                return Kraken.Model.SamplingScheme.S444;
+            }
+            else
+            {
+                return Kraken.Model.SamplingScheme.Default;
+            }
         }
     }
 }

@@ -48,6 +48,39 @@ namespace Kraken.Powershell
             )]
         public string CallBackUrl { get; set; }
 
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            ValueFromPipeline = true,
+            Position = 5
+            )]
+        public bool Lossy { get; set; } = false;
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            ValueFromPipeline = true,
+            Position = 6
+            )]
+        public bool WebP { get; set; } = false;
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            ValueFromPipeline = true,
+            Position = 7
+            )]
+        public bool AutoOrient { get; set; } = false;
+
+        [Parameter(
+            Mandatory = false,
+            ValueFromPipelineByPropertyName = true,
+            ValueFromPipeline = true,
+            Position = 8
+            )]
+        [ValidateSet ("4:2:0", "4:2:2", "4:4:4")]
+        public string SamplingScheme { get; set; } = "4:2:0";
+
         protected override void BeginProcessing()
         {
             Connection = Connection.Create(Key, Secret);
