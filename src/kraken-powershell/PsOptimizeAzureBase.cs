@@ -1,89 +1,88 @@
-using System.Collections;
 using System.Management.Automation;
 using Kraken.Model.Azure;
+using System;
 
 namespace Kraken.Powershell
 {
-    public abstract class PsOptimizeAzureBase : PsOptimizeBase
+    public abstract class PsOptimizeAzureBase : PsOptimizeExternalStorageBase
     {
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 10
+            ValueFromPipeline = true
             )]
         public string AzureAccount { get; set; }
 
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 11
+            ValueFromPipeline = true
             )]
         public string AzureKey { get; set; }
 
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 12
+            ValueFromPipeline = true
             )]
         public string AzureContainer { get; set; }
 
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 13
+            ValueFromPipeline = true
             )]
         public string AzurePath { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 14
-        )]
-        public Hashtable Headers { get; set; }
 
-        [Parameter(
-            Mandatory = false,
-            ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 15
-        )]
-        public Hashtable Metadata { get; set; }
-
-        internal DataStore CreateDataStore(string account, string key, string container, string path)
+        private void Validation()
         {
-            var ds = new DataStore(account, key, container, path);
+            CantUseAzureSharedPropertiesAndOptimizeImageItems();
+        }
 
-            if (Headers != null)
+        private void CantUseAzureSharedPropertiesAndOptimizeImageItems()
+        {
+            if (OptimizeImageItems != null)
             {
-                foreach (DictionaryEntry kvp in Headers)
+                if (Headers != null || Metadata != null || AzurePath != null)
                 {
-                    var eKey = kvp.Key as string;
-                    var eVal = kvp.Value as string;
-
-                    if (!string.IsNullOrEmpty(eKey) && !string.IsNullOrEmpty(eVal))
-                    {
-                        ds.AddHeaders(eKey, eVal);
-                    }
+                    throw new ArgumentException(
+                        Consts.CantUseAzureSharedPropertiesAndOptimizeImageItemsMessage);
                 }
             }
+        }
 
-            if (Metadata != null)
+        protected override void BeginProcessing()
+        {
+            base.BeginProcessing();
+
+            Validation();
+        }
+
+        internal DataStore CreateDataStore(OptimizeImageItem item, bool keepPath = false)
+        {
+            string path;
+
+            if (OptimizeImageItems != null)
             {
-                foreach (DictionaryEntry kvp in Metadata)
-                {
-                    var eKey = kvp.Key as string;
-                    var eVal = kvp.Value as string;
+                //note: ExternalStoragePath will be ignored when using keepPath
+                path = HelperFunctions.BuildPathAzure(item.Path, keepPath, item.ExternalStoragePath, AzureContainer);
+            }
+            else
+            {
+                path = HelperFunctions.BuildPathAzure(item.Path, keepPath, AzurePath, AzureContainer);
+            }
 
-                    if (!string.IsNullOrEmpty(eKey) && !string.IsNullOrEmpty(eVal))
-                    {
-                        ds.AddMetadata(eKey, eVal);
-                    }
-                }
+            var ds = new DataStore(AzureAccount, AzureKey, AzureContainer, path);
+
+            //todo: refactor
+            if (OptimizeImageItems != null) 
+            {
+                ds = SetHeadersMetadata(ds, item.Headers, item.Metadata) as DataStore;
+            }
+            else
+            {
+                ds = SetHeadersMetadata(ds, Headers, Metadata) as DataStore;
             }
 
             return ds;

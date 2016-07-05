@@ -64,12 +64,14 @@
     <Compile Include="Model\ResultCallback.cs" />
     <Compile Include="Model\ResultWait.cs" />
     <Compile Include="OptimizeImage.cs" />
+    <Compile Include="OptimizeImageItem.cs" />
     <Compile Include="OptimizeImageToS3.cs" />
     <Compile Include="OptimizeImageToAzure.cs" />
     <Compile Include="OptimizeImageUrl.cs" />
     <Compile Include="OptimizeImageUrlToS3.cs" />
     <Compile Include="OptimizeImageUrlToAzure.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="PsOptimizeExternalStorageBase.cs" />
     <Compile Include="PsOptimizeS3Base.cs" />
     <Compile Include="PsOptimizeAzureBase.cs" />
     <Compile Include="PsOptimizeBase.cs" />

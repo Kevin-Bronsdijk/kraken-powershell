@@ -11,46 +11,73 @@ namespace Kraken.Powershell
     public class OptimizeImageUrlToS3 : PsOptimizeS3Base
     {
         [Parameter(
-            Mandatory = true,
+            Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 0
+            ValueFromPipeline = true
             )]
         public string[] FileUrl { get; set; }
         
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 9
+            ValueFromPipeline = true
             )]
         public bool KeepPath { get; set; } = false;
+
+        private void Validation()
+        {
+            CantUseKeepPathAndS3Path();
+
+            FileUrlOrOptimizeImageItemsRequired();
+
+            CantUseFileUrlAndOptimizeImageItems();
+        }
+        private void CantUseKeepPathAndS3Path()
+        {
+            if (KeepPath && !string.IsNullOrEmpty(S3Path))
+            {
+                throw new ArgumentException(Consts.CantUseKeepPathAndS3PathMessage);
+            }
+        }
+
+        private void FileUrlOrOptimizeImageItemsRequired()
+        {
+            if (FileUrl == null && OptimizeImageItems == null)
+            {
+                throw new ArgumentException(Consts.FileUrlOrOptimizeImageItemsRequiredMesssage);
+            }
+        }
+
+        private void CantUseFileUrlAndOptimizeImageItems()
+        {
+            if (FileUrl != null && OptimizeImageItems != null)
+            {
+                throw new ArgumentException(Consts.CantUseFileUrlAndOptimizeImageItemsMessage);
+            }
+        }
 
         protected override void ProcessRecord()
         {
             base.ProcessRecord();
 
-            if (KeepPath && !string.IsNullOrEmpty(S3Path))
+            Validation();
+
+            var items = OptimizeImageItems;
+            if (FileUrl != null)
             {
-                throw new ArgumentNullException("Can't use KeepPath and S3Path at the same time");
+                items = HelperFunctions.CreateOptimizeImageItems(FileUrl).ToArray();
             }
 
-            MessageAdapter adapter = new MessageAdapter(this, FileUrl.Count())
-            {
-                Message = Consts.ProgressMessage,
-                Formatter = new ApiResultFormatter()
-            };
+            MessageAdapter adapter = CreateMessageAdapter(items.Count());
 
             Task.Factory.StartNew(() => 
             {
-                for (int x = 0; x < FileUrl.Count(); x++)
+                for (int x = 0; x < items.Count(); x++)
                 {
                     if (Wait)
                     {
-                        var request = new OptimizeWaitRequest(new Uri(FileUrl[x]),
-                            CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
-                                HelperFunctions.BuildPath(FileUrl[x], KeepPath, S3Path, AmazonBucket)
-                            ))
+                        var request = new OptimizeWaitRequest(new Uri(items[x].Path),
+                            CreateDataStore(items[x], KeepPath))
                         {
                             WebP = WebP,
                             Lossy = Lossy,
@@ -63,10 +90,8 @@ namespace Kraken.Powershell
                     }
                     else
                     {
-                        var request = new OptimizeRequest(new Uri(FileUrl[x]), new Uri(CallBackUrl),
-                            CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
-                                HelperFunctions.BuildPath(FileUrl[x], KeepPath, S3Path, AmazonBucket)
-                            ))
+                        var request = new OptimizeRequest(new Uri(items[x].Path), new Uri(CallBackUrl),
+                            CreateDataStore(items[x], KeepPath))
                         {
                             WebP = WebP,
                             Lossy = Lossy,

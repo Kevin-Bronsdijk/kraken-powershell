@@ -19,67 +19,70 @@ namespace Kraken.Powershell
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 1
+            ValueFromPipeline = true
             )]
         public string Key { get; set; }
 
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 2
+            ValueFromPipeline = true
             )]
         public string Secret { get; set; }
 
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 3
+            ValueFromPipeline = true
             )]
         public bool Wait { get; set; }
 
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 4
+            ValueFromPipeline = true
             )]
         public string CallBackUrl { get; set; }
 
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 5
+            ValueFromPipeline = true
             )]
         public bool Lossy { get; set; } = false;
 
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 6
+            ValueFromPipeline = true
             )]
         public bool WebP { get; set; } = false;
 
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 7
+            ValueFromPipeline = true
             )]
         public bool AutoOrient { get; set; } = false;
 
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 8
+            ValueFromPipeline = true
             )]
         [ValidateSet ("4:2:0", "4:2:2", "4:4:4")]
         public string SamplingScheme { get; set; } = "4:2:0";
+
+        internal MessageAdapter CreateMessageAdapter(int count)
+        {
+            MessageAdapter adapter = new MessageAdapter(this, count)
+            {
+                Message = Consts.ProgressMessage,
+                Formatter = new ApiResultFormatter()
+            };
+
+            return adapter;
+        }
 
         protected override void BeginProcessing()
         {
@@ -88,7 +91,7 @@ namespace Kraken.Powershell
 
             if (!Wait && string.IsNullOrEmpty(CallBackUrl))
             {
-                throw new ArgumentNullException(Consts.CallBackUrlRequiredMesssage);
+                throw new ArgumentException(Consts.CallBackUrlRequiredMesssage);
             }
 
             base.BeginProcessing();

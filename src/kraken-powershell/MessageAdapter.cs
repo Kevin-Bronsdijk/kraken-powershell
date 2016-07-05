@@ -30,7 +30,7 @@ namespace Kraken.Powershell
                 while (Queue.Count > 0)
                 {
                     progress.PercentComplete = Count * 100 / Total;
-                    progress.StatusDescription = (Count) + "//" + Total;
+                    progress.StatusDescription = (Count) + "/" + Total;
                     Cmdlet.WriteProgress(progress);
 
                     Cmdlet.WriteObject(Formatter.FormatObject(Queue.Dequeue()));

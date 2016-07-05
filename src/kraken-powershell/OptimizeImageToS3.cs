@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Linq;
 using System.Management.Automation;
 using System.Threading.Tasks;
@@ -11,33 +10,57 @@ namespace Kraken.Powershell
     public class OptimizeImageToS3 : PsOptimizeS3Base
     {
         [Parameter(
-            Mandatory = true,
+            Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 0
+            ValueFromPipeline = true
             )]
         public string[] FilePath { get; set; }
+
+        private void Validation()
+        {
+            FilePathOrOptimizeImageItemsRequired();
+
+            CantUseFilePathAndOptimizeImageItems();
+        }
+
+        private void CantUseFilePathAndOptimizeImageItems()
+        {
+            if (FilePath != null && OptimizeImageItems != null)
+            {
+                throw new ArgumentException(Consts.CantUseFilePathAndOptimizeImageItemsMessage);
+            }
+        }
+
+        private void FilePathOrOptimizeImageItemsRequired()
+        {
+            if (FilePath == null && OptimizeImageItems == null)
+            {
+                throw new ArgumentException(Consts.FilePathOrOptimizeImageItemsRequiredMesssage);
+            }
+        }
 
         protected override void ProcessRecord()
         {
             base.ProcessRecord();
 
-            MessageAdapter adapter = new MessageAdapter(this, FilePath.Count())
+            Validation();
+
+            var items = OptimizeImageItems;
+            if (FilePath != null)
             {
-                Message = Consts.ProgressMessage,
-                Formatter = new ApiResultFormatter()
-            };
+                items = HelperFunctions.CreateOptimizeImageItems(FilePath).ToArray();
+            }
+
+            MessageAdapter adapter = CreateMessageAdapter(items.Count());
 
             Task.Factory.StartNew(() => 
             {
-                for (int x = 0; x < FilePath.Count(); x++)
+                for (int x = 0; x < items.Count(); x++)
                 {
                     if (Wait)
                     {
                         var request = new OptimizeUploadWaitRequest(
-                            CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
-                            S3Path + Path.GetFileName(FilePath[x]))
-                            )
+                            CreateDataStore(items[x]))
                         {
                             WebP = WebP,
                             Lossy = Lossy,
@@ -45,15 +68,13 @@ namespace Kraken.Powershell
                             SamplingScheme = HelperFunctions.ConvertSamplingScheme(SamplingScheme)
                         };
 
-                        var task = Client.OptimizeWait(FilePath[x], request);
+                        var task = Client.OptimizeWait(items[x].Path, request);
                         adapter.WriteObject(task.Result);
                     }
                     else
                     {
                         var request = new OptimizeUploadRequest(new Uri(CallBackUrl),
-                            CreateDataStore(AmazonKey, AmazonSecret, AmazonBucket,
-                            S3Path + Path.GetFileName(FilePath[x]))
-                            )
+                            CreateDataStore(items[x]))
                         {
                             WebP = WebP,
                             Lossy = Lossy,

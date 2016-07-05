@@ -11,46 +11,74 @@ namespace Kraken.Powershell
     public class OptimizeImageUrlToAzure : PsOptimizeAzureBase
     {
         [Parameter(
-            Mandatory = true,
+            Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 0
+            ValueFromPipeline = true
             )]
         public string[] FileUrl { get; set; }
         
         [Parameter(
             Mandatory = false,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 9
+            ValueFromPipeline = true
             )]
         public bool KeepPath { get; set; } = false;
+
+        private void Validation()
+        {
+            CantUseKeepPathAndAzurePath();
+
+            FileUrlOrOptimizeImageItemsRequired();
+
+            CantUseFileUrlAndOptimizeImageItems();
+        }
+
+        private void CantUseKeepPathAndAzurePath()
+        {
+            if (KeepPath && !string.IsNullOrEmpty(AzurePath))
+            {
+                throw new ArgumentException(Consts.CantUseKeepPathAndAzurePathMessage);
+            }
+        }
+
+        private void FileUrlOrOptimizeImageItemsRequired()
+        {
+            if (FileUrl == null && OptimizeImageItems == null)
+            {
+                throw new ArgumentException(Consts.FileUrlOrOptimizeImageItemsRequiredMesssage);
+            }
+        }
+
+        private void CantUseFileUrlAndOptimizeImageItems()
+        {
+            if (FileUrl != null && OptimizeImageItems != null)
+            {
+                throw new ArgumentException(Consts.CantUseFileUrlAndOptimizeImageItemsMessage);
+            }
+        }
 
         protected override void ProcessRecord()
         {
             base.ProcessRecord();
 
-            if (KeepPath && !string.IsNullOrEmpty(AzurePath))
+            Validation();
+
+            var items = OptimizeImageItems;
+            if (FileUrl != null)
             {
-                throw new ArgumentNullException("Can't use KeepPath and AzurePath at the same time");
+                items = HelperFunctions.CreateOptimizeImageItems(FileUrl).ToArray();
             }
 
-            MessageAdapter adapter = new MessageAdapter(this, FileUrl.Count())
-            {
-                Message = Consts.ProgressMessage,
-                Formatter = new ApiResultFormatter()
-            };
+            MessageAdapter adapter = CreateMessageAdapter(items.Count());
 
             Task.Factory.StartNew(() => 
             {
-                for (int x = 0; x < FileUrl.Count(); x++)
+                for (int x = 0; x < items.Count(); x++)
                 {
                     if (Wait)
                     {
-                        var request = new OptimizeWaitRequest(new Uri(FileUrl[x]),
-                            CreateDataStore(AzureAccount, AzureKey, AzureContainer,
-                                HelperFunctions.BuildPath(FileUrl[x], KeepPath, AzurePath, AzureContainer)
-                            ))
+                        var request = new OptimizeWaitRequest(new Uri(items[x].Path),
+                            CreateDataStore(items[x], KeepPath))
                         {
                             WebP = WebP,
                             Lossy = Lossy,
@@ -63,10 +91,8 @@ namespace Kraken.Powershell
                     }
                     else
                     {
-                        var request = new OptimizeRequest(new Uri(FileUrl[x]), new Uri(CallBackUrl),
-                            CreateDataStore(AzureAccount, AzureKey, AzureContainer,
-                                HelperFunctions.BuildPath(FileUrl[x], KeepPath, AzurePath, AzureContainer)
-                            ))
+                        var request = new OptimizeRequest(new Uri(items[x].Path), new Uri(CallBackUrl),
+                            CreateDataStore(items[x], KeepPath))
                         {
                             WebP = WebP,
                             Lossy = Lossy,

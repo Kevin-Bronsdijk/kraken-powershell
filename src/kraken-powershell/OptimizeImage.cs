@@ -12,8 +12,7 @@ namespace Kraken.Powershell
         [Parameter(
             Mandatory = true,
             ValueFromPipelineByPropertyName = true,
-            ValueFromPipeline = true,
-            Position = 0
+            ValueFromPipeline = true
             )]
         public string[] FilePath { get; set; }
 
@@ -21,11 +20,7 @@ namespace Kraken.Powershell
         {
             base.ProcessRecord();
 
-            MessageAdapter adapter = new MessageAdapter(this, FilePath.Count())
-            {
-                Message = Consts.ProgressMessage,
-                Formatter = new ApiResultFormatter()
-            };
+            MessageAdapter adapter = CreateMessageAdapter(FilePath.Count());
 
             Task.Factory.StartNew(() => 
             {
